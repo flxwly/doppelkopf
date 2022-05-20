@@ -1,6 +1,8 @@
 #include <iostream>
 #include "Card.hpp"
 
+std::array<sf::Texture, NUMBER_OF_CARDS + 1> Card::textures = {};
+
 int Card::getPointValue(Card card) {
     return getPointValue(card.symbol);
 }
@@ -91,28 +93,8 @@ int Card::getTrumpValue(char symbol, char color) {
 }
 
 void Card::createShape() {
-    shape.setSize(sf::Vector2f(WINDOW_WIDTH / 30, WINDOW_HEIGHT / 20));
+    shape.setSize(sf::Vector2f(CARD_WIDTH, CARD_HEIGHT));
     makeVisible();
-}
-
-void Card::makeVisible() {
-    switch (color) {
-        case 'E':
-            shape.setFillColor(sf::Color::Magenta);
-            break;
-        case 'G':
-            shape.setFillColor(sf::Color::Green);
-            break;
-        case 'R':
-            shape.setFillColor(sf::Color::Red);
-            break;
-        case 'S':
-            shape.setFillColor(sf::Color::Yellow);
-            break;
-        default:
-            std::cerr << "Unexpected value: " << color << std::endl;
-            break;
-    };
 }
 
 Card::Card(int num) : color(numToColor(num)), symbol(numToSymbol(num)),
@@ -164,6 +146,40 @@ char Card::numToColor(int num) {
     }
 }
 
+int Card::colorToNum(char color) {
+    switch (color) {
+        case 'E':
+            return 0;
+        case 'G':
+            return 10;
+        case 'R':
+            return 20;
+        case 'S':
+            return 30;
+        default:
+            std::cerr << "Unexpected value: " << color << std::endl;
+            return -1;
+    }
+}
+
+int Card::symbolToNum(char symbol) {
+    switch (symbol) {
+        case 'A':
+            return 0;
+        case '1':
+            return 2;
+        case 'K':
+            return 4;
+        case 'O':
+            return 6;
+        case 'U':
+            return 8;
+        default:
+            std::cerr << "Unexpected value: " << symbol << std::endl;
+            return -1;
+    }
+}
+
 void Card::draw(sf::RenderTarget &target, sf::RenderStates states) const {
     target.draw(shape);
 }
@@ -172,5 +188,19 @@ void Card::arrangeAsStack(std::vector<Card *> cards, sf::Vector2f startPosition,
     for (int i = 0; i < cards.size(); i++) {
         cards[i]->setPosition(startPosition + static_cast<float>(i) * spacing);
         cards[i]->setRotation(orientation);
+    }
+}
+
+
+
+void Card::loadTextures() {
+    for (int i = 0; i < 40; i += 2) {
+        sf::Texture texture;
+        if (!texture.loadFromFile("../recources/cards/" + std::to_string(i) + ".jpg")) {
+            std::cerr << "Error loading card texture" << std::endl;
+            exit(999);
+        }
+        Card::textures[i] = texture;
+        Card::textures[i + 1] = texture;
     }
 }

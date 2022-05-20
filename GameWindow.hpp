@@ -21,8 +21,6 @@ public:
 
     void close();
 
-    bool hasEnded() const { return ended; };
-
     void beginnNextPlayersTurn();
 
     static void shuffleCards(std::vector<Card *> &availableCards);
@@ -44,8 +42,6 @@ private:
     int playedTricks = 0;
     int currentTrickHolder = 0;
     int currentPlayer = 0;
-
-    bool ended = false;
 };
 
 #endif //DOPPELKOPF_GAMEWINDOW_HPP

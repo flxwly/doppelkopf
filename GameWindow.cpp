@@ -14,6 +14,10 @@ void GameWindow::shuffleCards(std::vector<Card *> &availableCards) {
 }
 
 void GameWindow::init() {
+
+    // ---- Preloading textures ----
+    Card::loadTextures();
+
     // ---- Game objects ----
     std::vector<Card *> availableCards;
     for (int i = 0; i < NUMBER_OF_CARDS; i++) {
@@ -45,8 +49,10 @@ void GameWindow::update() {
             close();
         } else if (event.type == sf::Event::MouseButtonPressed) {
             if (event.mouseButton.button == sf::Mouse::Left) {
-                Card *card = players[currentPlayer].playClickedCard(sf::Vector2f(event.mouseButton.x, event.mouseButton.y));
-                if (card != nullptr) {
+
+                Card *firstCard = (currentTrick.empty()) ? nullptr : currentTrick.front();
+                Card *card = players[currentPlayer].playClickedCard(sf::Vector2f(event.mouseButton.x, event.mouseButton.y), firstCard);
+                if (card) {
                     currentTrick.push_back(card);
                     if (!currentTrickCard || doesTrick(currentTrickCard, card)) {
                         currentTrickCard = card;
@@ -75,7 +81,6 @@ void GameWindow::render() {
 
     for (int i = 0; i < 4; ++i) {
         window.draw(players[i]);
-
     }
 
     if (!currentTrick.empty()) {
