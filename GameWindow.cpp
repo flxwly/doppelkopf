@@ -14,6 +14,10 @@ void GameWindow::shuffleCards(std::vector<Card *> &availableCards) {
 }
 
 void GameWindow::init() {
+
+    // ---- Preloading textures ----
+    Card::loadTextures();
+
     // ---- Game objects ----
     std::vector<Card *> availableCards;
     for (int i = 0; i < NUMBER_OF_CARDS; i++) {
