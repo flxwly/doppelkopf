@@ -35,12 +35,13 @@ public:
 
     void setRotation(float rotation) { shape.setRotation(rotation); };
 
-    void makeInvisible() { shape.setTexture(&Card::textures[42]); };
+    void makeInvisible() { shape.setTexture(&Card::textures[40]); };
 
     void makeVisible() { shape.setTexture(&Card::textures[colorToNum(color) + symbolToNum(symbol)]); };
 
     static void
     arrangeAsStack(std::vector<Card *> cards, sf::Vector2f startPosition, sf::Vector2f spacing, float orientation);
+    static void arrangeAsHand(std::vector<Card *> cards);
 
     static void loadTextures();
 

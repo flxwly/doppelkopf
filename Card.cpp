@@ -1,4 +1,5 @@
 #include <iostream>
+#include <cmath>
 #include "Card.hpp"
 
 std::array<sf::Texture, NUMBER_OF_CARDS + 1> Card::textures = {};
@@ -191,16 +192,41 @@ void Card::arrangeAsStack(std::vector<Card *> cards, sf::Vector2f startPosition,
     }
 }
 
+void Card::arrangeAsHand(std::vector<Card *> cards)  {
+
+    const unsigned int count = cards.size();
+
+    const float a = WINDOW_HEIGHT / 8; // a
+    const float c = WINDOW_WIDTH / 3;
+
+    const float r = (powf(a, 2) + powf(c, 2)) / (2 * a);
+    const float alpha = 2 * atanf(2 * a * c / (powf(a, 2) + powf(c, 2)));
+
+    const sf::Vector2f center = sf::Vector2f(WINDOW_WIDTH / 2, WINDOW_HEIGHT - WINDOW_HEIGHT / 4 + r);
+
+    for (int i = 0; i < count; ++i) {
+        float angle = 3.14152f / 2 + alpha / 2 - alpha * (float) i / (float) (count);
+        sf::Vector2f pos = center + sf::Vector2f(cosf(angle) * r, -sinf(angle) * r);
+        cards[i]->setPosition(pos);
+        cards[i]->setRotation(90 - angle * 180 / M_PI);
+    }
+}
+
 
 
 void Card::loadTextures() {
+    sf::Texture texture;
     for (int i = 0; i < 40; i += 2) {
-        sf::Texture texture;
-        if (!texture.loadFromFile("../recources/cards/" + std::to_string(i) + ".jpg")) {
+        if (!texture.loadFromFile("../resources/cards/" + std::to_string(i) + ".jpg")) {
             std::cerr << "Error loading card texture" << std::endl;
             exit(999);
         }
         Card::textures[i] = texture;
         Card::textures[i + 1] = texture;
     }
+    if (!texture.loadFromFile("../resources/cards/hidden.jpg")) {
+        std::cerr << "Error loading card texture" << std::endl;
+        exit(999);
+    }
+    Card::textures[40] = texture;
 }

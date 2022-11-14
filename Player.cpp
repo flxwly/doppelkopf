@@ -5,28 +5,6 @@ Player::Player(std::vector<Card *> cards) {
     this->cards = cards;
 }
 
-
-void Player::displayHand(sf::RenderTarget &target, sf::RenderStates states) const {
-
-    const unsigned int count = cards.size();
-
-    const float handHeight = WINDOW_HEIGHT / 16; // a
-    const float handWidth = WINDOW_WIDTH / 2;
-
-    const float x = (powf(handHeight, 2) + powf(handWidth/2, 2)) / (2 * handHeight);
-    const float alpha = 2 * atan(2 * handHeight * handWidth / (powf(handHeight, 2) + powf(handWidth/2, 2)));
-    const sf::Vector2f center = sf::Vector2f(WINDOW_WIDTH / 2, WINDOW_HEIGHT + WINDOW_HEIGHT / 16 - x);
-
-
-    for (int i = 0; i < count; ++i) {
-        float a = 90 + alpha - alpha * (float) i / (float) count;
-        sf::Vector2f pos = sf::Vector2f(cos(a) * x, sin(a) * x);
-        cards[i]->setPosition(pos);
-        cards[i]->setRotation(90 - a);
-        target.draw(*cards[i]);
-    }
-}
-
 void Player::draw(sf::RenderTarget &target, sf::RenderStates states) const {
     float i = 0;
 
@@ -42,17 +20,18 @@ void Player::draw(sf::RenderTarget &target, sf::RenderStates states) const {
 
     switch (placeInQueue) {
         case 0:
-            displayHand(target, states);
             break;
         case 1:
             startPos = sf::Vector2f(15 * horizontalSpacingToWall, 15 * verticalSpacingToWall);
             spacing = sf::Vector2f(0, -verticalSpacing);
             orientation = 270;
+            Card::arrangeAsStack(cards, startPos, spacing, orientation);
             break;
         case 2:
             startPos = sf::Vector2f(15 * horizontalSpacingToWall, verticalSpacingToWall);
             spacing = sf::Vector2f(-horizontalSpacing, 0);
             orientation = 180;
+            Card::arrangeAsStack(cards, startPos, spacing, orientation);
             break;
         case 3:
             startPos = sf::Vector2f(horizontalSpacingToWall, verticalSpacingToWall);
@@ -62,12 +41,13 @@ void Player::draw(sf::RenderTarget &target, sf::RenderStates states) const {
         default:
             return;
     }
-    Card::arrangeAsStack(cards, startPos, spacing, orientation);
-    for (auto card: cards) {
 
+    for (auto card: cards) {
         if (placeInQueue == 0) {
+            Card::arrangeAsHand(cards);
             card->makeVisible();
         } else {
+            Card::arrangeAsStack(cards, startPos, spacing, orientation);
             card->makeInvisible();
         }
 

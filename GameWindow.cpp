@@ -5,7 +5,7 @@
 
 GameWindow::GameWindow() {
     // ---- Main window ----
-    window.create(sf::VideoMode(800, 600), "Doppelkopf");
+    window.create(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "Doppelkopf");
     window.setFramerateLimit(60);
 }
 
