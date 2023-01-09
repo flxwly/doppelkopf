@@ -2,6 +2,7 @@
 #define DOPPELKOPF_GAMEWINDOW_HPP
 
 #include <SFML/Graphics.hpp>
+#include <SFML/Window.hpp>
 #include <list>
 #include "Player.hpp"
 #include "Card.hpp"
@@ -22,6 +23,7 @@ public:
     void close();
 
     void beginnNextPlayersTurn();
+    void beginnNewTrick();
 
     static void shuffleCards(std::vector<Card *> &availableCards);
     static bool doesTrick(Card *oldCard, Card *newCard);
@@ -31,6 +33,7 @@ public:
 private:
     // ---- Main window ----
     sf::RenderWindow window;
+    sf::Font gameFont;
 
     // ---- Game objects ----
     std::array<Card, 52> cards;

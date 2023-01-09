@@ -8,7 +8,6 @@
 #include <utility>
 #include "Card.hpp"
 #include "WindowSettings.hpp"
-#include "AI.hpp"
 
 class Player {
 public:
@@ -16,25 +15,27 @@ public:
 
     explicit Player(std::vector<Card *> cards, int playerID) {
         this->cards = std::move(cards);
-        ai = AI(this);
         this->playerID = playerID;
-        this->placeInQueue = playerID;
     };
+
+    Card *playCard(std::vector<Card *> currentTrick, Card *clickedCard);
+    Card *playCard(std::vector<Card *> currentTrick);
+    bool isPlayable(std::vector<Card *> currentTrick, Card* card);
+
+    void addTrick(const std::vector<Card *> &trick, int currentPlayer, int trickHolder);
 
     Card *chooseCard(std::vector<Card *> currentTrick);
 
-    Card *playCard(std::vector<Card *> currentTrick, Card *clickedCard);
-
-    Card *playCard(std::vector<Card *> currentTrick);
-
-    void addTrick(const std::vector<Card *> &trick) { tricks.push_back(trick); };
+    std::array<int, 4> evaluateState();
 
     int playerID = 0;
     int placeInQueue = 0;
-    std::vector<std::vector<Card *>> tricks;
     std::vector<Card *> cards;
+    std::vector<std::vector<Card *>> tricks;
 
-    AI ai;
+
+    // AI Part
+    std::vector<std::pair<std::vector<std::pair<Card *, int>>, int>> allTricks;
 };
 
 

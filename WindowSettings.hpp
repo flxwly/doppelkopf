@@ -14,7 +14,7 @@
 #define NUMBER_OF_PLAYERS 4
 #define NUMBER_OF_CARDS_PER_PLAYER 10
 
-
+#define HUMAN_PLAYER 0
 
 
 

@@ -96,7 +96,7 @@ int Card::getTrumpValue(char symbol, char color) {
 void Card::createShape() {
     shape.setSize(sf::Vector2f(CARD_WIDTH, CARD_HEIGHT));
     shape.setOrigin(CARD_WIDTH / 2, CARD_HEIGHT / 2);
-    shape.setTexture(&Card::textures[40]);
+    shape.setTexture(&Card::textures[0]);
     shape.setOutlineColor(sf::Color::Yellow);
     shape.setOutlineThickness(0);
 }
@@ -219,8 +219,8 @@ void Card::arrangeAsHand(std::vector<Card *> cards)  {
 
 void Card::loadTextures() {
     sf::Texture texture;
-    texture.setSmooth(true);
-    texture.setRepeated(true);
+    texture.setSmooth(false);
+    texture.setRepeated(false);
     for (int i = 0; i < 40; i += 2) {
         if (!texture.loadFromFile("../resources/cards/" + std::to_string(i) + ".jpg")) {
             std::cerr << "Error loading card texture" << std::endl;

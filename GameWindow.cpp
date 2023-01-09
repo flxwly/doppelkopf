@@ -7,6 +7,11 @@ GameWindow::GameWindow() {
     // ---- Main window ----
     window.create(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "Doppelkopf");
     window.setFramerateLimit(60);
+
+    if (!gameFont.loadFromFile("../resources/fonts/arial.ttf")) {
+        std::cerr << "Error loading font" << std::endl;
+        exit(999);
+    }
 }
 
 void GameWindow::shuffleCards(std::vector<Card *> &availableCards) {
@@ -27,7 +32,7 @@ void GameWindow::init() {
     shuffleCards(availableCards);
 
     // ---- Players ----
-    for (int i = 0; i < 3; ++i) {
+    for (int i = 0; i < 4; ++i) {
         std::vector<Card *> playerHand(
                 make_move_iterator(availableCards.begin() + i * NUMBER_OF_CARDS_PER_PLAYER),
                 make_move_iterator(
@@ -59,7 +64,18 @@ void GameWindow::update() {
             case sf::Event::MouseButtonPressed:
                 if (event.mouseButton.button == sf::Mouse::Left) {
                     Card *card;
-                    if (currentPlayer == 0) {
+
+                    if (currentTrick.size() == 4) {
+                        for (auto &player: players) {
+                            player.addTrick(currentTrick, currentPlayer, currentTrickHolder);
+                        }
+
+                        playedTricks++;
+
+                        beginnNewTrick();
+                    }
+
+                    if (currentPlayer == HUMAN_PLAYER) {
                         Card *clickedCard = nullptr;
                         for (const auto &c: players[currentPlayer].cards) {
                             if (c->getShape().getGlobalBounds().contains(event.mouseButton.x, event.mouseButton.y)) {
@@ -67,7 +83,6 @@ void GameWindow::update() {
                                 break;
                             }
                         }
-                        std::cout << "Playing clicked card" << std::endl;
                         card = players[currentPlayer].playCard(currentTrick, clickedCard);
                     } else {
                         card = players[currentPlayer].playCard(currentTrick);
@@ -80,16 +95,9 @@ void GameWindow::update() {
                             currentTrickHolder = currentPlayer;
                         }
 
-                        if (currentTrick.size() == 4) {
-                            std::swap(currentTrick.front(), currentTrick[currentTrickHolder]);
-                            players[currentTrickHolder].addTrick(currentTrick);
-                            currentTrick.clear();
-
-                            currentTrickCard = nullptr;
-                            playedTricks++;
+                        if (currentTrick.size() != 4) {
+                            beginnNextPlayersTurn();
                         }
-
-                        beginnNextPlayersTurn();
                     }
                 }
         }
@@ -116,6 +124,12 @@ void GameWindow::render() {
         window.draw(*card);
     }
 
+    sf::Text whosTurn;
+    whosTurn.setFont(gameFont);
+    whosTurn.setString("Player " + std::to_string(currentPlayer));
+    whosTurn.setPosition(WINDOW_WIDTH / 2,  WINDOW_HEIGHT / 3);
+    window.draw(whosTurn);
+
     window.display();
 
 }
@@ -125,6 +139,17 @@ void GameWindow::beginnNextPlayersTurn() {
     for (auto &player: players) {
         player.placeInQueue = ((player.placeInQueue == 0) ? NUMBER_OF_PLAYERS : player.placeInQueue) - 1;
     }
+}
+
+void GameWindow::beginnNewTrick() {
+
+    currentTrick.clear();
+    currentTrickCard = nullptr;
+
+    for (auto &player: players) {
+        player.placeInQueue = (player.playerID - currentTrickHolder < 0) ? (player.playerID - currentTrickHolder) + NUMBER_OF_PLAYERS : (player.playerID - currentTrickHolder);
+    }
+    currentPlayer = currentTrickHolder;
 }
 
 void GameWindow::close() {
