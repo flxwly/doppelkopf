@@ -26,13 +26,13 @@ void GameWindow::init() {
     }
     shuffleCards(availableCards);
 
-    for (int i = 0; i < 4; ++i) {
+    // ---- Players ----
+    for (int i = 0; i < 3; ++i) {
         std::vector<Card *> playerHand(
                 make_move_iterator(availableCards.begin() + i * NUMBER_OF_CARDS_PER_PLAYER),
                 make_move_iterator(
                         availableCards.begin() + NUMBER_OF_CARDS_PER_PLAYER + i * NUMBER_OF_CARDS_PER_PLAYER));
-        players[i] = Player(playerHand);
-        players[i].placeInQueue = i;
+        players[i] = Player(playerHand, i);
     }
 
     // ---- Game state ----
@@ -45,33 +45,53 @@ void GameWindow::init() {
 void GameWindow::update() {
 
     if (sf::Event event; window.pollEvent(event)) {
-        if (event.type == sf::Event::Closed) {
-            close();
-        } else if (event.type == sf::Event::MouseButtonPressed) {
-            if (event.mouseButton.button == sf::Mouse::Left) {
-
-                Card *firstCard = (currentTrick.empty()) ? nullptr : currentTrick.front();
-                Card *card = players[currentPlayer].playClickedCard(sf::Vector2f(event.mouseButton.x, event.mouseButton.y), firstCard);
-                if (card) {
-                    currentTrick.push_back(card);
-                    if (!currentTrickCard || doesTrick(currentTrickCard, card)) {
-                        currentTrickCard = card;
-                        currentTrickHolder = currentPlayer;
-                    }
-
-                    if (currentTrick.size() == 4) {
-                        std::swap(currentTrick.front(), currentTrick[currentTrickHolder]);
-                        players[currentTrickHolder].addTrick(currentTrick);
-                        currentTrick.clear();
-
-                        currentTrickCard = nullptr;
-                        playedTricks++;
-                    }
-
-
-                    beginnNextPlayersTurn();
+        switch (event.type) {
+            case sf::Event::Closed:
+                close();
+                break;
+            case sf::Event::MouseMoved:
+                for (auto &c: cards) {
+                    if (c.getShape().getGlobalBounds().contains(event.mouseMove.x, event.mouseMove.y))
+                        c.highlight();
+                    else
+                        c.deHighlight();
                 }
-            }
+            case sf::Event::MouseButtonPressed:
+                if (event.mouseButton.button == sf::Mouse::Left) {
+                    Card *card;
+                    if (currentPlayer == 0) {
+                        Card *clickedCard = nullptr;
+                        for (const auto &c: players[currentPlayer].cards) {
+                            if (c->getShape().getGlobalBounds().contains(event.mouseButton.x, event.mouseButton.y)) {
+                                clickedCard = c;
+                                break;
+                            }
+                        }
+                        std::cout << "Playing clicked card" << std::endl;
+                        card = players[currentPlayer].playCard(currentTrick, clickedCard);
+                    } else {
+                        card = players[currentPlayer].playCard(currentTrick);
+                    }
+
+                    if (card) {
+                        currentTrick.push_back(card);
+                        if (!currentTrickCard || doesTrick(currentTrickCard, card)) {
+                            currentTrickCard = card;
+                            currentTrickHolder = currentPlayer;
+                        }
+
+                        if (currentTrick.size() == 4) {
+                            std::swap(currentTrick.front(), currentTrick[currentTrickHolder]);
+                            players[currentTrickHolder].addTrick(currentTrick);
+                            currentTrick.clear();
+
+                            currentTrickCard = nullptr;
+                            playedTricks++;
+                        }
+
+                        beginnNextPlayersTurn();
+                    }
+                }
         }
     }
 }
@@ -79,12 +99,16 @@ void GameWindow::update() {
 void GameWindow::render() {
     window.clear();
 
-    for (int i = 0; i < 4; ++i) {
-        window.draw(players[i]);
+    Card::arrangeAsHand(players[0].cards);
+    for (auto c: players[0].cards) {
+        c->makeVisible();
+        window.draw(*c);
     }
 
+
     if (!currentTrick.empty()) {
-        Card::arrangeAsStack(currentTrick, sf::Vector2f (WINDOW_WIDTH / 3, WINDOW_HEIGHT / 2), sf::Vector2f(WINDOW_WIDTH / 16, 0), 0);
+        Card::arrangeAsStack(currentTrick, sf::Vector2f(WINDOW_WIDTH / 3, WINDOW_HEIGHT / 2),
+                             sf::Vector2f(WINDOW_WIDTH / 16, 0), 0);
     }
 
     for (auto &card: currentTrick) {

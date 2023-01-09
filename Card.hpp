@@ -39,8 +39,19 @@ public:
 
     void makeVisible() { shape.setTexture(&Card::textures[colorToNum(color) + symbolToNum(symbol)]); };
 
+    void highlight() {
+        shape.setSize(sf::Vector2f(CARD_HIGHLIGHTED_WIDTH, CARD_HIGHLIGHTED_HEIGHT));
+        shape.setOutlineThickness(2);
+    };
+
+    void deHighlight() {
+        shape.setSize(sf::Vector2f(CARD_WIDTH, CARD_HEIGHT));
+        shape.setOutlineThickness(0);
+    };
+
     static void
     arrangeAsStack(std::vector<Card *> cards, sf::Vector2f startPosition, sf::Vector2f spacing, float orientation);
+
     static void arrangeAsHand(std::vector<Card *> cards);
 
     static void loadTextures();
