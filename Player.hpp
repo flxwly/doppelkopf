@@ -13,29 +13,40 @@ class Player {
 public:
     Player() = default;
 
-    explicit Player(std::vector<Card *> cards, int playerID) {
+    explicit Player(std::vector<Card *> cards, int playerID, std::vector<Card *> allCards) {
         this->cards = std::move(cards);
         this->playerID = playerID;
+        this->availableCards = allCards;
     };
 
     Card *playCard(std::vector<Card *> currentTrick, Card *clickedCard);
+
     Card *playCard(std::vector<Card *> currentTrick);
-    bool isPlayable(std::vector<Card *> currentTrick, Card* card);
+
+    bool isPlayable(std::vector<Card *> currentTrick, Card *card);
+
+    bool isPlayable(std::vector<std::pair<Card *, int>> currentTrick, Card *card);
 
     void addTrick(const std::vector<Card *> &trick, int currentPlayer, int trickHolder);
 
     Card *chooseCard(std::vector<Card *> currentTrick);
 
-    std::array<int, 4> evaluateState();
-
     int playerID = 0;
+
     int placeInQueue = 0;
     std::vector<Card *> cards;
     std::vector<std::vector<Card *>> tricks;
-
-
     // AI Part
+
     std::vector<std::pair<std::vector<std::pair<Card *, int>>, int>> allTricks;
+    std::vector<Card *> availableCards;
+
+    Card *maxN(int maxDepth, int depth, std::vector<Card *> availableCards, std::vector<Card *> playerCards,
+               std::pair<std::vector<std::pair<Card *, int>>, int> currentTrick, int currentPlayer,
+               std::vector<std::pair<std::vector<std::pair<Card *, int>>, int>> allTricks);
+
+    static std::array<int, 4>
+    evaluateState(const std::vector<std::pair<std::vector<std::pair<Card *, int>>, int>> &allTricks);
 };
 
 

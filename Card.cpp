@@ -235,3 +235,10 @@ void Card::loadTextures() {
     }
     Card::textures[40] = texture;
 }
+
+bool Card::doesTrick(Card *oldCard, Card *newCard) {
+    return oldCard->trumpValue > 0 && newCard->trumpValue > oldCard->trumpValue ||  // both trump
+           (oldCard->trumpValue < 0 && newCard->trumpValue > 0) ||  // old card is not trump and new card is trump
+           (newCard->color == oldCard->color && newCard->trumpValue > oldCard->trumpValue); // same color and not trump
+
+}

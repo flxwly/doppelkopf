@@ -62,6 +62,8 @@ public:
 
     sf::RectangleShape getShape() { return shape; };
 
+    static bool doesTrick(Card *oldCard, Card *newCard);
+
 private:
     static std::array<sf::Texture, NUMBER_OF_CARDS + 1> textures;
     sf::RectangleShape shape;

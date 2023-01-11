@@ -26,7 +26,6 @@ public:
     void beginnNewTrick();
 
     static void shuffleCards(std::vector<Card *> &availableCards);
-    static bool doesTrick(Card *oldCard, Card *newCard);
 
     explicit operator bool() const { return window.isOpen(); }
 

@@ -37,7 +37,7 @@ void GameWindow::init() {
                 make_move_iterator(availableCards.begin() + i * NUMBER_OF_CARDS_PER_PLAYER),
                 make_move_iterator(
                         availableCards.begin() + NUMBER_OF_CARDS_PER_PLAYER + i * NUMBER_OF_CARDS_PER_PLAYER));
-        players[i] = Player(playerHand, i);
+        players[i] = Player(playerHand, i, availableCards);
     }
 
     // ---- Game state ----
@@ -90,7 +90,7 @@ void GameWindow::update() {
 
                     if (card) {
                         currentTrick.push_back(card);
-                        if (!currentTrickCard || doesTrick(currentTrickCard, card)) {
+                        if (!currentTrickCard || Card::doesTrick(currentTrickCard, card)) {
                             currentTrickCard = card;
                             currentTrickHolder = currentPlayer;
                         }
@@ -154,11 +154,4 @@ void GameWindow::beginnNewTrick() {
 
 void GameWindow::close() {
     window.close();
-}
-
-bool GameWindow::doesTrick(Card *oldCard, Card *newCard) {
-    return oldCard->trumpValue > 0 && newCard->trumpValue > oldCard->trumpValue ||  // both trump
-           (oldCard->trumpValue < 0 && newCard->trumpValue > 0) ||  // old card is not trump and new card is trump
-           (newCard->color == oldCard->color && newCard->trumpValue > oldCard->trumpValue); // same color and not trump
-
 }
