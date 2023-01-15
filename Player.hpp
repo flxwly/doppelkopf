@@ -8,45 +8,42 @@
 #include <utility>
 #include "Card.hpp"
 #include "WindowSettings.hpp"
+#include "MaxNTreeNode.hpp"
 
 class Player {
 public:
     Player() = default;
 
-    explicit Player(std::vector<Card *> cards, int playerID, std::vector<Card *> allCards) {
-        this->cards = std::move(cards);
+    explicit Player(const std::vector<Card *>& cards, int playerID, std::vector<Card *> allCards) {
+        this->cards = cards;
         this->playerID = playerID;
-        this->availableCards = allCards;
+        for (auto c: this->cards) {
+            allCards.erase(std::remove(allCards.begin(), allCards.end(), c), allCards.end());
+        }
+        availableCards = allCards;
+        gameState = MaxNTreeNode(availableCards, cards, {}, {}, 0, playerID, nullptr);
     };
 
-    Card *playCard(std::vector<Card *> currentTrick, Card *clickedCard);
+    Card *playCard(const std::pair<std::vector<std::pair<Card *, int>>, int> &currentTrick, Card *clickedCard);
 
-    Card *playCard(std::vector<Card *> currentTrick);
+    Card *playCard(const std::pair<std::vector<std::pair<Card *, int>>, int> &currentTrick);
 
-    bool isPlayable(std::vector<Card *> currentTrick, Card *card);
+    void removeAvailableCard(Card * c) {availableCards.erase(std::remove(availableCards.begin(), availableCards.end(), c), availableCards.end());};
 
-    bool isPlayable(std::vector<std::pair<Card *, int>> currentTrick, Card *card);
+    void addTrick(const std::vector<std::pair<Card *, int>> &trick, int currentPlayer, int trickHolder);
 
-    void addTrick(const std::vector<Card *> &trick, int currentPlayer, int trickHolder);
-
-    Card *chooseCard(std::vector<Card *> currentTrick);
+    Card *chooseCard(const std::pair<std::vector<std::pair<Card *, int>>, int> &currentTrick);
 
     int playerID = 0;
-
     int placeInQueue = 0;
+
     std::vector<Card *> cards;
-    std::vector<std::vector<Card *>> tricks;
+    std::vector<std::vector<std::pair<Card *, int>>> tricks;
     // AI Part
+    MaxNTreeNode gameState;
 
-    std::vector<std::pair<std::vector<std::pair<Card *, int>>, int>> allTricks;
     std::vector<Card *> availableCards;
-
-    Card *maxN(int maxDepth, int depth, std::vector<Card *> availableCards, std::vector<Card *> playerCards,
-               std::pair<std::vector<std::pair<Card *, int>>, int> currentTrick, int currentPlayer,
-               std::vector<std::pair<std::vector<std::pair<Card *, int>>, int>> allTricks);
-
-    static std::array<int, 4>
-    evaluateState(const std::vector<std::pair<std::vector<std::pair<Card *, int>>, int>> &allTricks);
+    std::vector<std::pair<std::vector<std::pair<Card *, int>>, int>> allTricks;
 };
 
 

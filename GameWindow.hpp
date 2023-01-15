@@ -39,10 +39,8 @@ private:
     std::array<Player, 4> players;
 
     // ---- Game state ----
-    std::vector<Card *> currentTrick;
-    Card *currentTrickCard = nullptr;
+    std::pair<std::vector<std::pair<Card *, int>>, int> currentTrick;
     int playedTricks = 0;
-    int currentTrickHolder = 0;
     int currentPlayer = 0;
 };
 

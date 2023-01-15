@@ -41,8 +41,8 @@ void GameWindow::init() {
     }
 
     // ---- Game state ----
-    currentTrick.clear();
-    currentTrickCard = nullptr;
+    currentTrick.first.clear();
+    currentTrick.second = currentPlayer;
     playedTricks = 0;
     currentPlayer = 0;
 }
@@ -54,6 +54,7 @@ void GameWindow::update() {
             case sf::Event::Closed:
                 close();
                 break;
+
             case sf::Event::MouseMoved:
                 for (auto &c: cards) {
                     if (c.getShape().getGlobalBounds().contains(event.mouseMove.x, event.mouseMove.y))
@@ -65,9 +66,9 @@ void GameWindow::update() {
                 if (event.mouseButton.button == sf::Mouse::Left) {
                     Card *card;
 
-                    if (currentTrick.size() == 4) {
+                    if (currentTrick.first.size() == 4) {
                         for (auto &player: players) {
-                            player.addTrick(currentTrick, currentPlayer, currentTrickHolder);
+                            player.addTrick(currentTrick.first, currentPlayer, currentTrick.first[currentTrick.second].second);
                         }
 
                         playedTricks++;
@@ -89,14 +90,21 @@ void GameWindow::update() {
                     }
 
                     if (card) {
-                        currentTrick.push_back(card);
-                        if (!currentTrickCard || Card::doesTrick(currentTrickCard, card)) {
-                            currentTrickCard = card;
-                            currentTrickHolder = currentPlayer;
+                        if (currentTrick.first.empty() || Card::doesTrick(currentTrick.first[currentTrick.second].first, card)) {
+                            currentTrick.second = currentTrick.first.size();
                         }
 
-                        if (currentTrick.size() != 4) {
+                        currentTrick.first.emplace_back(card, currentPlayer);
+
+                        if (currentTrick.first.size() != 4) {
                             beginnNextPlayersTurn();
+                        }
+
+                        for (int i = 0; i < NUMBER_OF_PLAYERS; ++i) {
+                            if (currentPlayer == i)
+                                continue;
+
+                            players[i].removeAvailableCard(card);
                         }
                     }
                 }
@@ -114,20 +122,20 @@ void GameWindow::render() {
     }
 
 
-    if (!currentTrick.empty()) {
-        Card::arrangeAsStack(currentTrick, sf::Vector2f(WINDOW_WIDTH / 3, WINDOW_HEIGHT / 2),
+    if (!currentTrick.first.empty()) {
+        Card::arrangeAsStack(currentTrick.first, sf::Vector2f(WINDOW_WIDTH / 3, WINDOW_HEIGHT / 2),
                              sf::Vector2f(WINDOW_WIDTH / 16, 0), 0);
     }
 
-    for (auto &card: currentTrick) {
-        card->makeVisible();
-        window.draw(*card);
+    for (auto &card: currentTrick.first) {
+        card.first->makeVisible();
+        window.draw(*card.first);
     }
 
     sf::Text whosTurn;
     whosTurn.setFont(gameFont);
     whosTurn.setString("Player " + std::to_string(currentPlayer));
-    whosTurn.setPosition(WINDOW_WIDTH / 2,  WINDOW_HEIGHT / 3);
+    whosTurn.setPosition(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 3);
     window.draw(whosTurn);
 
     window.display();
@@ -143,13 +151,19 @@ void GameWindow::beginnNextPlayersTurn() {
 
 void GameWindow::beginnNewTrick() {
 
-    currentTrick.clear();
-    currentTrickCard = nullptr;
+    int currentTrickHolder = currentTrick.first[currentTrick.second].second;
+
 
     for (auto &player: players) {
-        player.placeInQueue = (player.playerID - currentTrickHolder < 0) ? (player.playerID - currentTrickHolder) + NUMBER_OF_PLAYERS : (player.playerID - currentTrickHolder);
+        player.placeInQueue = (player.playerID - currentTrickHolder < 0) ? (player.playerID - currentTrickHolder) +
+                                                                           NUMBER_OF_PLAYERS : (player.playerID -
+                                                                                                currentTrickHolder);
     }
+
     currentPlayer = currentTrickHolder;
+
+    currentTrick.first.clear();
+    currentTrick.second = 0;
 }
 
 void GameWindow::close() {

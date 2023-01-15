@@ -188,10 +188,10 @@ void Card::draw(sf::RenderTarget &target, sf::RenderStates states) const {
     target.draw(shape);
 }
 
-void Card::arrangeAsStack(std::vector<Card *> cards, sf::Vector2f startPosition, sf::Vector2f spacing, float orientation) {
+void Card::arrangeAsStack(std::vector<std::pair<Card *, int>> cards, sf::Vector2f startPosition, sf::Vector2f spacing, float orientation) {
     for (int i = 0; i < cards.size(); i++) {
-        cards[i]->setPosition(startPosition + static_cast<float>(i) * spacing);
-        cards[i]->setRotation(orientation);
+        cards[i].first->setPosition(startPosition + static_cast<float>(i) * spacing);
+        cards[i].first->setRotation(orientation);
     }
 }
 
@@ -241,4 +241,40 @@ bool Card::doesTrick(Card *oldCard, Card *newCard) {
            (oldCard->trumpValue < 0 && newCard->trumpValue > 0) ||  // old card is not trump and new card is trump
            (newCard->color == oldCard->color && newCard->trumpValue > oldCard->trumpValue); // same color and not trump
 
+}
+
+bool Card::isPlayable(const std::vector<std::pair<Card *, int>> &currentTrick, const std::vector<Card *> &playerCards, Card *card) {
+
+    // Check if card is playable
+    // If there's no first card, the player can play any card
+    // If the player can play a card of the same color as the first card, he must play it. If not, he must play any card
+    // Colors are E, R, G, S and T
+
+    if (card == nullptr) {
+        return false;
+    }
+
+    if (currentTrick.empty() || playerCards.empty()) {
+        return true;
+    }
+
+    Card *firstCard = currentTrick.front().first;
+
+    // first Card of trick is trump
+    if (firstCard->trumpValue > 0) {
+        bool playerHasTrump = std::any_of(playerCards.begin(), playerCards.end(), [](Card *c) {
+            return c->trumpValue > 0;
+        });
+
+        return !(playerHasTrump && card->trumpValue < 0);
+    } else {
+        bool playerHasSameColor = std::any_of(playerCards.begin(), playerCards.end(), [firstCard](Card *c) {
+            return c->trumpValue < 0 && c->color == firstCard->color;
+        });
+
+
+        // Hat selbe Farbe -> card.color == firstcard.color && card kein trumpf
+        // Hat nicht selbe Farbe -> card.color egal
+        return (playerHasSameColor && card->color == firstCard->color && card->trumpValue < 0) || !playerHasSameColor;
+    }
 }

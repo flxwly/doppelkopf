@@ -50,7 +50,7 @@ public:
     };
 
     static void
-    arrangeAsStack(std::vector<Card *> cards, sf::Vector2f startPosition, sf::Vector2f spacing, float orientation);
+    arrangeAsStack(std::vector<std::pair<Card *, int>> cards, sf::Vector2f startPosition, sf::Vector2f spacing, float orientation);
 
     static void arrangeAsHand(std::vector<Card *> cards);
 
@@ -63,6 +63,7 @@ public:
     sf::RectangleShape getShape() { return shape; };
 
     static bool doesTrick(Card *oldCard, Card *newCard);
+    static bool isPlayable(const std::vector<std::pair<Card *, int>> &currentTrick, const std::vector<Card *> &playerCards, Card *card);
 
 private:
     static std::array<sf::Texture, NUMBER_OF_CARDS + 1> textures;
